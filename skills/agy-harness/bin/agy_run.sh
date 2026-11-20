@@ -100,9 +100,9 @@ if [ "$rc" = 0 ] && grep -q '"response":"",' "$out/RESULT.json"; then rc=65; fi
 if [ -n "$workdir" ] && [ "$writes" = 1 ]; then
   mkdir -p "$out/workdir"
   if [ "$AGY_MODE" = local ]; then
-    tar -C "$workdir" -cf - . 2>/dev/null | tar -C "$out/workdir" -xf - 2>/dev/null
+    tar -C "$workdir" --exclude=.git --exclude=node_modules -cf - . 2>/dev/null | tar -C "$out/workdir" -xf - 2>/dev/null
   else
-    ssh -o BatchMode=yes -i "$KEY" "$HOST" "tar -C '$workdir' -cf - . 2>/dev/null" \
+    ssh -o BatchMode=yes -i "$KEY" "$HOST" "tar -C '$workdir' --exclude=.git --exclude=node_modules -cf - . 2>/dev/null" \
       | tar -C "$out/workdir" -xf - 2>/dev/null
   fi
 fi

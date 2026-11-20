@@ -52,7 +52,7 @@ Two transports, identical output contract:
 | `--sandbox` | not passed (usually unavailable: `unshare` blocked) | passed with `--allow-writes` |
 | `--dangerously-skip-permissions` | with `--allow-writes` | with `--allow-writes` |
 | `--workdir` | local path | **remote** path, created + mirrored back via tar |
-| artifacts mirror | local tar | tar over ssh |
+| artifacts mirror | local tar (excludes `.git`, `node_modules`) | tar over ssh (same excludes) |
 
 Outputs: `OK|<transport>|<out>/RESULT.json|<tokens>|<sec>s` or `FAIL|<transport>|exit=<n>|<out>`.
 Exit codes: `0` · `65` empty response · `124` timeout · `2` bad args.
@@ -100,13 +100,19 @@ readable object instead.
 - credentials come from `$OUTLINE_ENV_FILE` (`OUTLINE_URL`, `OUTLINE_API_KEY`, optional
   `OUTLINE_COLLECTION_DOKUMENTASI_AGENTS`) — see the `outline-keton` skill
 
-## 7. Model default
+## 7. Configuration file
+
+`$HOME/.config/agy-harness/env` (override with `AGY_CONFIG_FILE`) is sourced by `agy_task.sh`
+before defaults resolve. Format: plain `KEY=VALUE` lines. Useful when the skill is not installed
+next to the scripts, e.g. `AGY_SKILL_DIR=/path/to/skill` and `AGY_STATE_DIR=/path/to/state`.
+
+## 8. Model default
 
 `gemini-3.8-flash-high`. `claude-sonnet-4-6` measured roughly half the base overhead for the same
 trivial prompt (5.5k vs 9.7k tokens) and is the better pick for code review. All models draw on the
 same Antigravity account quota — switching models does not add quota.
 
-## 8. Known limits
+## 9. Known limits
 
 - `--json-schema` is broken in agy v1.5.13 (hangs in `auto`, ignored in `plan`) — use
   `report-json` + `--expect-json`.

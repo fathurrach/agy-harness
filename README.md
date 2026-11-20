@@ -81,7 +81,7 @@ agy_task.sh --task audit-auth \
   --template analysis \
   --set "target=src/auth" \
   --set "questions=1) mana yang bisa gagal diam-diam? 2) mana yang menelan error?" \
-  --allow-writes --timeout 420 --print-response
+  --allow-writes --workdir "$(pwd)" --timeout 420 --print-response
 
 # prove it afterwards (anyone can re-run this, costs nothing)
 agy_verify.sh --task audit-auth --expect-file HASIL.md
@@ -92,6 +92,17 @@ agy_usage.sh --days 7
 
 Templates: `analysis`, `code-change`, `review`, `report-json`.
 Good briefs read like *target + questions + proof required*, not *"check this"*.
+
+## Examples, use cases, FAQ
+
+| Document | What's inside |
+|---|---|
+| [`docs/PATHS.md`](docs/PATHS.md) | three ways to call agy (direct / sub-agent / cron) + when to use which |
+| [`docs/USECASES.md`](docs/USECASES.md) | six real scenarios with **measured** token costs, including one that ate 95k tokens for nothing |
+| [`examples/`](examples/) | ready-to-paste briefs: JSON extraction, second opinion, small code change |
+| [`docs/FAQ.md`](docs/FAQ.md) | "do I need a sub-agent?", "why exit 65?", "why so expensive?" |
+
+Rule of thumb: if the job would take you **under 5 minutes** by hand, don't spend ~10k tokens on it.
 
 ## Exit codes
 

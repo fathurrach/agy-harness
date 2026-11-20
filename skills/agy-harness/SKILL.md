@@ -156,6 +156,12 @@ Kalau token mati, ulangi urutan yang sama; tidak perlu menghapus apa pun kecuali
 | `AGY_MODE` | `local` | `ssh` untuk menjalankan agy di host lain (`AGY_HOST`, `AGY_KEY`) |
 | `OUTLINE_ENV_FILE` | `~/.config/outline-keton.env` | kredensial Outline untuk `--outline` |
 
+Variabel di atas juga bisa dipatok permanen lewat file konfigurasi (KEY=VALUE, di-source otomatis):
+
+```bash
+~/.config/agy-harness/env      # contoh: AGY_SKILL_DIR=/path/ke/skill
+```
+
 ## Pitfalls
 
 1. `--mode plan` tidak menjawab — menulis rencana. Default `auto`.
