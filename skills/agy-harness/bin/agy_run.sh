@@ -72,7 +72,10 @@ if [ "$AGY_MODE" = local ]; then
   # PreToolUse hook: read-only + workspace-scoped work is allowed, destructive /
   # credential / system writes are denied. Replaces --dangerously-skip-permissions.
   if [ "${AGY_AUTO:-1}" = 1 ] && [ -x "$AGY_HOME/.gemini/config/plugins/agy-auto/hook.sh" ]; then
-    export AGY_AUTO_POLICY="${AGY_AUTO_POLICY:-$AGY_HOME/.gemini/config/plugins/agy-auto/policy/local-1.5.13.toml}"
+    for _ov in agy-1.5.13.toml local-1.5.13.toml; do
+      _p="$AGY_HOME/.gemini/config/plugins/agy-auto/policy/$_ov"
+      [ -f "$_p" ] && { export AGY_AUTO_POLICY="${AGY_AUTO_POLICY:-$_p}"; break; }
+    done
     if [ -z "${AGY_CLASSIFIER_KEY:-}" ]; then
       AGY_CLASSIFIER_KEY=$(grep -m1 -E "^  api_key:" "${AGY_MAIN_CONFIG:-/opt/data/config.yaml}" 2>/dev/null | sed -E 's/.*api_key: *//')
     fi

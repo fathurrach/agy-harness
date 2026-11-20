@@ -33,6 +33,17 @@ HOME=$AGY_HOME agy -p "/settings" --output-format json | grep -o '"toolPermissio
 
 ## Instalasi (per AGY_HOME, tidak global)
 
+Cara tercepat — pakai fork yang sudah membawa semua penyesuaian di bawah:
+
+```bash
+git clone -b feat/agy-1.5.13-compat https://github.com/fathurrach/agy-auto.git
+cd agy-auto
+AGY_HOME=$HOME/.agy-home ./install-hermes.sh    # salin, set toolPermission, verifikasi, smoke test
+# output yang diharapkan: hook ✓ · toolPermission ✓ · 3 smoke test ✓
+```
+
+Langkah manual (kalau tidak mau pakai installer):
+
 ```bash
 # 1. plugin ke dalam AGY_HOME (agy 1.5.13 mendukung ~/.gemini/config/plugins)
 git clone https://github.com/onkarbadve/agy-auto.git "$AGY_HOME/.gemini/config/plugins/agy-auto"
@@ -57,17 +68,20 @@ write_path_args = { write_file = "Path", write_to_file = "TargetFile", replace_f
 
 Tanpa ini, `read_file`/`write_file` masuk kategori "unknown tool" → classifier → sering deny.
 
-**(b) `/opt/**` adalah system path** di policy upstream, sedangkan workspace kita di `/opt/data`.
-Overlay **tidak bisa mengurangi** list `system` (sifatnya union), jadi patch presisi pada policy
-plugin:
+**(b) Workspace di bawah path sistem** (`/opt/**`, kadang `/home/**`) ditolak untuk ditulis.
+Cara yang benar dan didukung upstream: `system_write_exceptions` di overlay — **jangan** mengubah
+daftar `system` (overlay menggabungkan list, jadi pengecualian lebih aman dan tidak melonggarkan
+path lain):
 
 ```toml
-# policy/default.toml, daftar system: ganti
-"/opt/**",                       ->  "/opt/hermes/**", "/opt/data/.agy-home-dedicated/.gemini/**",
+[paths]
+system_write_exceptions = ["/opt/data/**"]
 ```
 
-Hermes tetap terlindungi, `/opt/data` jadi user-space. Patch ini **hilang kalau plugin di-update** —
-catat di `docs/PUBLISH.md` dan ulangi setelah update.
+Dengan ini `/opt/data` boleh ditulis sementara `/opt/hermes` (kode Hermes) tetap ditolak.
+
+Fork kita sudah membawa ini: lihat `policy/agy-1.5.13.toml` di
+https://github.com/fathurrach/agy-auto (branch `feat/agy-1.5.13-compat`).
 
 **(c) Classifier** — alihkan ke 9router supaya tidak butuh kunci Google AI Studio:
 
