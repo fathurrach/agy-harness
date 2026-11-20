@@ -1,0 +1,7 @@
+# local state / secrets
+*.env
+.agy-home/
+ledger.jsonl
+__pycache__/
+*.pyc
+.DS_Store
