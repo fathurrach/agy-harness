@@ -4,6 +4,13 @@ Turn the **Antigravity CLI (`agy`)** into a *verifiable sub-agent worker* for He
 agent that can read a `SKILL.md`): one command per task, machine-checkable result, and every run
 logged with its token cost.
 
+> [!WARNING]
+> **Not sanctioned by Google.** Driving the Antigravity CLI from a third-party agent is called out
+> in the [Antigravity Terms of Service](docs/TERMS.md) as a possible breach, and may lead to
+> suspension of your Antigravity / Gemini CLI accounts. Use a separate, disposable Google account;
+> never your work account. For production automation use the official APIs instead.
+> Read **[docs/TERMS.md](docs/TERMS.md)** before installing.
+
 Built because "the sub-agent said it worked" is not evidence.
 
 ```
@@ -101,6 +108,7 @@ Good briefs read like *target + questions + proof required*, not *"check this"*.
 | [`docs/USECASES.md`](docs/USECASES.md) | six real scenarios with **measured** token costs, including one that ate 95k tokens for nothing |
 | [`examples/`](examples/) | ready-to-paste briefs: JSON extraction, second opinion, small code change |
 | [`docs/FAQ.md`](docs/FAQ.md) | "do I need a sub-agent?", "why exit 65?", "why so expensive?" |
+| [`docs/TERMS.md`](docs/TERMS.md) | **the terms risk**: exact quote, risk per usage pattern, sanctioned alternatives |
 
 Rule of thumb: if the job would take you **under 5 minutes** by hand, don't spend ~10k tokens on it.
 

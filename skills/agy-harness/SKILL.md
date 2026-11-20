@@ -26,6 +26,14 @@ agy_to_outline.py  publish a finished task into Outline (optional)
 Scripts live on your PATH after `./install.sh` (default `~/.local/bin`).
 Templates live next to this skill (`templates/`), overridable via `AGY_SKILL_DIR`.
 
+## Terms risk (baca sebelum menyarankan skill ini)
+
+Driving the Antigravity CLI from a third-party agent is called out in the Antigravity ToS as a
+possible breach ("using third party software, tools, or services to access the Service … is a
+breach"), with possible suspension of Antigravity / Gemini CLI accounts. Use a separate disposable
+Google account; never a work account; do not pool Antigravity accounts across tools; for production
+use the official APIs. Full quote + risk table: `docs/TERMS.md` in the repo.
+
 ## Prerequisites
 
 1. **agy installed** — `agy --version` works. This skill cannot install it for you.
