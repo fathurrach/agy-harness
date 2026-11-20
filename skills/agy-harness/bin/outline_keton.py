@@ -12,6 +12,7 @@ The key never appears in argv, logs, or this script.
 """
 import argparse
 import json
+import os
 import sys
 import urllib.error
 import urllib.request

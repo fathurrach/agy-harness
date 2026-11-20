@@ -11,6 +11,10 @@
 # Ledger: /opt/data/tmp/agy/ledger.jsonl (one JSON per run)
 set -uo pipefail
 
+# --- optional user config (KEY=VALUE lines, sourced before defaults) ----------
+CFG="${AGY_CONFIG_FILE:-$HOME/.config/agy-harness/env}"
+if [ -r "$CFG" ]; then set -a; . "$CFG"; set +a; fi
+
 # --- portable layout (env-overridable) ----------------------------------------
 # AGY_BIN_DIR: where agy_run.sh / agy_verify.sh / agy_to_outline.py live
 # AGY_STATE_DIR: task dirs + ledger (default XDG state)
@@ -31,6 +35,7 @@ TPL_DIR="$(_resolve_tpl)"
 task=""; brief=""; text=""; template=""; allow_writes=0; wd=""; tmo=300
 model="gemini-3.8-flash-high"; expect_json=0; show_resp=0; sets=()
 outline_title=""; outline_parent=""; dry_run=0; auto_remediate=1
+agent=""; activity=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -47,6 +52,8 @@ while [ $# -gt 0 ]; do
     --print-response) show_resp=1; shift ;;
     --outline) outline_title="${2:?}"; shift 2 ;;
     --outline-parent) outline_parent="${2:?}"; shift 2 ;;
+    --agent) agent="${2:?}"; shift 2 ;;
+    --activity) activity=1; shift ;;
     --dry-run) dry_run=1; shift ;;
     --no-auto-retry) auto_remediate=0; shift ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
@@ -54,6 +61,8 @@ while [ $# -gt 0 ]; do
 done
 
 [ -n "$task" ] || { echo "FAIL|--task required" >&2; exit 2; }
+case "$agent" in ""|pilot|coder|professor) ;; *) echo "FAIL|--agent harus pilot|coder|professor" >&2; exit 2 ;; esac
+if [ "$activity" = 1 ] && [ -z "$agent" ]; then echo "FAIL|--activity butuh --agent" >&2; exit 2; fi
 case "$task" in */*|*..*) echo "FAIL|task name must be a simple slug" >&2; exit 2 ;; esac
 
 d="$ROOT/$task"
@@ -158,8 +167,8 @@ arts=$(find "$out/workdir" -type f 2>/dev/null | sort | tr '\n' ',' | sed 's/,$/
 tokens=$(python3 -c "import json;print(json.load(open('$out/META.json'))['total_tokens'])" 2>/dev/null || echo 0)
 wall=$(python3 -c "import json;print(json.load(open('$out/META.json'))['wall_seconds'])" 2>/dev/null || echo 0)
 
-printf '{"ts":"%s","task":"%s","exit":%s,"status":"%s","json":"%s","tokens":%s,"wall":%s,"model":"%s","out":"%s","retry":"%s","artifacts":"%s"}\n' \
-  "$(date -Is)" "$task" "$rc" "$status" "$json_ok" "$tokens" "$wall" "$model" "$out" "$retry" "$arts" \
+printf '{"ts":"%s","task":"%s","agent":"%s","exit":%s,"status":"%s","json":"%s","tokens":%s,"wall":%s,"model":"%s","out":"%s","retry":"%s","artifacts":"%s"}\n' \
+  "$(date -Is)" "$task" "$agent" "$rc" "$status" "$json_ok" "$tokens" "$wall" "$model" "$out" "$retry" "$arts" \
   >> "$ROOT/ledger.jsonl"
 
 # pemeriksa deterministik: exit 0 saja tidak cukup, artefak harus benar-benar ada
@@ -177,6 +186,11 @@ if [ -n "$outline_title" ] && [ "$rc" = 0 ]; then
   oargs=(--task "$task" --title "$outline_title")
   [ -n "$outline_parent" ] && oargs+=(--parent "$outline_parent")
   python3 "$BIN_DIR/agy_to_outline.py" "${oargs[@]}" || echo "OUTLINE|FAIL"
+fi
+
+# Activity Logger: satu dokumen per run, di cabang agent masing-masing
+if [ "$activity" = 1 ] && [ "$rc" = 0 ]; then
+  python3 "$BIN_DIR/agy_activity.py" --agent "$agent" --publish --task "$task" || echo "ACTIVITY|FAIL"
 fi
 if [ "$show_resp" = 1 ]; then
   python3 -c "import json;print(json.load(open('$out/RESULT.json')).get('response','').strip())" 2>/dev/null

@@ -123,6 +123,17 @@ Reply with ONLY this JSON, no prose:
 **Tanpa artefak = belum selesai.** Parent verifikasi ulang; ringkasan sub-agent bukan bukti.
 Kalau tugasnya cuma "jalankan satu perintah", jangan delegasi — panggil runner langsung.
 
+## Permission gate (agy-auto)
+
+`agy_run.sh` otomatis memakai hook **agy-auto** kalau terpasang di `$AGY_HOME` — jadi
+`--dangerously-skip-permissions` tidak dipakai lagi. Read-only + workspace-scoped work diizinkan,
+hapus rekursif di luar workspace / baca kredensial / tulis path sistem **ditolak** (fail-closed).
+Matikan dengan `AGY_AUTO=0` (kembali ke perilaku lama).
+
+Wajib untuk agy 1.5.13: `toolPermission: always-proceed` di
+`$AGY_HOME/.gemini/antigravity-cli/settings.json`, overlay pemetaan `read_file`/`write_file`, dan
+patch `/opt/**` → `/opt/hermes/**`. Semua langkah + hasil uji ada di `docs/AGY-AUTO.md`.
+
 ## Biaya & konkurensi (terukur)
 
 | Skenario | Wall | Token |

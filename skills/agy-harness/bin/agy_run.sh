@@ -67,9 +67,20 @@ if [ "$AGY_MODE" = local ]; then
   [ -n "$workdir" ] && mkdir -p "$workdir"
   FLAGS=($flags)   # no word-splitting on the JSON schema: use an array locally
   [ -n "$schema" ] && FLAGS+=(--json-schema "$(cat "$schema")")
-  # headless tools are auto-denied unless approved; the container is the sandbox here,
-  # so approving tools is the documented trade (--sandbox cannot run: unshare is blocked)
-  [ "$writes" = 1 ] && FLAGS+=(--dangerously-skip-permissions)
+
+  # --- agy-auto permission gate (default ON) ---------------------------------
+  # PreToolUse hook: read-only + workspace-scoped work is allowed, destructive /
+  # credential / system writes are denied. Replaces --dangerously-skip-permissions.
+  if [ "${AGY_AUTO:-1}" = 1 ] && [ -x "$AGY_HOME/.gemini/config/plugins/agy-auto/hook.sh" ]; then
+    export AGY_AUTO_POLICY="${AGY_AUTO_POLICY:-$AGY_HOME/.gemini/config/plugins/agy-auto/policy/local-1.5.13.toml}"
+    if [ -z "${AGY_CLASSIFIER_KEY:-}" ]; then
+      AGY_CLASSIFIER_KEY=$(grep -m1 -E "^  api_key:" "${AGY_MAIN_CONFIG:-/opt/data/config.yaml}" 2>/dev/null | sed -E 's/.*api_key: *//')
+    fi
+    export AGY_CLASSIFIER_KEY
+  else
+    # fallback: no gate installed -> old blunt behaviour
+    [ "$writes" = 1 ] && FLAGS+=(--dangerously-skip-permissions)
+  fi
   run() { HOME="$AGY_HOME" timeout "$tmo" "$LOCAL_BIN" -p "$(cat "$brief")" "${FLAGS[@]}"; }
   cd "${workdir:-/tmp}" || exit 2
 else

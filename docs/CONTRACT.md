@@ -50,7 +50,7 @@ Two transports, identical output contract:
 |---|---|---|
 | runs agy | `$AGY_BIN` with `HOME=$AGY_HOME` | `agy` on `$AGY_HOST` as that user |
 | `--sandbox` | not passed (usually unavailable: `unshare` blocked) | passed with `--allow-writes` |
-| `--dangerously-skip-permissions` | with `--allow-writes` | with `--allow-writes` |
+| `--dangerously-skip-permissions` | only if `AGY_AUTO=0`; default = agy-auto hook gate (see docs/AGY-AUTO.md) | with `--allow-writes` |
 | `--workdir` | local path | **remote** path, created + mirrored back via tar |
 | artifacts mirror | local tar (excludes `.git`, `node_modules`) | tar over ssh (same excludes) |
 
